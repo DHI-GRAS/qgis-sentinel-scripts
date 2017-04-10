@@ -1,6 +1,6 @@
 #Definition of inputs and outputs
 #==================================
-##graspy tools=group
+##Sentinel Tools=group
 ##Export Sentinel-2 data=name
 ##ParameterFile|inDir|Sentinel-2 product folder (.SAFE)|True|False|
 ##ParameterBoolean|B1|Band 1 (Aerosol 60m)|False

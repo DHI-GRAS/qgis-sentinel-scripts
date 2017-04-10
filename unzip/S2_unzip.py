@@ -1,6 +1,6 @@
 #Definition of inputs and outputs
 #==================================
-##Sentinel tools=group
+##Sentinel Tools=group
 ##Unzip Sentinel-2 data=name
 ##ParameterFile|inFile|zipped file|False|False|zip
 ##OutputDirectory|processingDir|Directory to unzip data to
