@@ -1,0 +1,3 @@
+[submodule "s2_export/external/gdal_utils"]
+	path = s2_export/external/gdal_utils
+	url = https://github.com/DHI-GRAS/gdal_utils.git

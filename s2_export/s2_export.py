@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import os
 import glob
 import fnmatch
@@ -7,10 +8,29 @@ import osr
 import numpy as np
 import scipy.ndimage
 
-from qgis_utils import DummyProgress
-import gdal_utils
+from external import gdal_utils
 
 from atmospheric_correction.read_satellite_metadata import readMetadataS2L1C
+
+
+class DummyProgress:
+    """Dummy replacement for QGIS processing progress"""
+
+    def __init__(self, logger=None):
+        """Dummy QGIS progress
+
+        Parameters
+        ----------
+        logger : logging.logger instance, optional
+            use logger for output
+        """
+        if logger is None:
+            self._info_func = print
+        else:
+            self._info_func = logger.info
+
+    def setConsoleInfo(self, msg):
+        self._info_func(msg)
 
 
 def find_tiles(input_dir, granules=[]):
