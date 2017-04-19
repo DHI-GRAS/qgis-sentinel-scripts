@@ -22,8 +22,12 @@
 ##*ParameterNumber|maxCldCov|Maximum cloud cover %|0|100|100
 ##*ParameterNumber|minDataCov|Minimum data cover %|0|100|0
 ##OutputDirectory|outDir|Directory to save the exported data in
+import os
+import sys
+here = os.path.dirname(scriptDescriptionFile)
+if here not in sys.path:
+    sys.path.append(here)
 import s2_export
-
 
 # Parse inputs
 
