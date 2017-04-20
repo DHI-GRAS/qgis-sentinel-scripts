@@ -1,0 +1,3 @@
+[submodule "s2_export"]
+	path = s2_export
+	url = https://github.com/DHI-GRAS/QGIS_s2_export.git
