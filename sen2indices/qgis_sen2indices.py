@@ -13,9 +13,9 @@ import sys
 here = os.path.dirname(scriptDescriptionFile)
 if here not in sys.path:
     sys.path.append(here)
-import sen2index
+import sen2indices
 
 print 'Starting index calculation...'
-sen2index.sen2index(input, outputDirectory)
+sen2indices.sen2indices(input, outputDirectory)
 print 'Finished writing to disk...'
 

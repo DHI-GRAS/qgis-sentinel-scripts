@@ -25,7 +25,7 @@ def calc_index(stack, bnd_num1, bnd_num2):
     return any_index
 
 
-def sen2index(inRst, outDir):
+def sen2indices(inRst, outDir):
     """
     Main function for calculating a selction of Sentinel 2 Spectral indices
     """
