@@ -7,7 +7,7 @@ import numpy as np
 
 def standard_index(band1, band2):
     """Function for standard index calculation"""
-    idx = ((band1 - band2)/(band1 + band2))*10000
+    idx = (band1 - band2) / (band1 + band2) * 10000
     return idx
 
 def extract_band(stack, bnd_num):
