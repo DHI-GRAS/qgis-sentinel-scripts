@@ -13,6 +13,7 @@ from osgeo import gdal
 
 driverOptionsGTiff = ['COMPRESS=DEFLATE', 'PREDICTOR=1', 'BIGTIFF=IF_SAFER']
 
+
 def atmProcessingMain(options):
 
     # Commonly used filenames
@@ -44,7 +45,6 @@ def atmProcessingMain(options):
 # Method taken from the bottom of http://s2tbx.telespazio-vega.de/sen2three/html/r2rusage.html
 # Assumes a L1C product which contains TOA reflectance: https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/product-types
 def toaRadianceS2(inImg, metadataFile, output_file):
-    qv = float(metadataFile['quantification_value'])
     e0 = []
     for e in metadataFile['irradiance_values']:
         e0.append(float(e))
@@ -54,7 +54,7 @@ def toaRadianceS2(inImg, metadataFile, output_file):
     # Convert to radiance
     radiometricData = np.zeros((inImg.RasterYSize, inImg.RasterXSize, len(visNirBands)))
     for i in range(len(visNirBands)):
-        rToa = (inImg.GetRasterBand(i+1).ReadAsArray().astype(float)) / qv
+        rToa = inImg.GetRasterBand(i+1).ReadAsArray()
         radiometricData[:, :, i] = (rToa * e0[i] * cos(radians(z))) / pi
     res = saveImg(radiometricData, inImg.GetGeoTransform(), inImg.GetProjection(), output_file)
     return res
@@ -62,7 +62,6 @@ def toaRadianceS2(inImg, metadataFile, output_file):
 
 # Assumes a L1C product which contains TOA reflectance: https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/product-types
 def toaReflectanceS2(inImg, metadataFile, output_file, doDOS=False):
-    qv = float(metadataFile['quantification_value'])
 
     # perform dark object substraction
     if doDOS:
@@ -73,10 +72,8 @@ def toaReflectanceS2(inImg, metadataFile, output_file, doDOS=False):
     # Convert to TOA reflectance
     rToa = np.zeros((inImg.RasterYSize, inImg.RasterXSize, inImg.RasterCount))
     for i in range(inImg.RasterCount):
-        rawData = inImg.GetRasterBand(i+1).ReadAsArray().astype(float)
-        rToa[:, :, i] = np.where((rawData-dosDN[i]) > 0,
-                                 (rawData-dosDN[i]) / qv,
-                                 0)
+        rawData = inImg.GetRasterBand(i+1).ReadAsArray()
+        rToa[:, :, i] = np.where((rawData-dosDN[i]) > 0, rawData-dosDN[i], 0)
 
     res = saveImg(rToa, inImg.GetGeoTransform(), inImg.GetProjection(), output_file)
     return res
@@ -192,7 +189,7 @@ def readMetadataS2L1C(metadataFile):
 
 
 # save the data to geotiff or memory
-def saveImg(data, geotransform, proj, outPath, noDataValue=np.nan):
+def saveImg(data, geotransform, proj, outPath, noDataValue=0):
 
     # Start the gdal driver for GeoTIFF
     if outPath == "MEM":
@@ -204,17 +201,17 @@ def saveImg(data, geotransform, proj, outPath, noDataValue=np.nan):
 
     shape = data.shape
     if len(shape) > 2:
-        ds = driver.Create(outPath, shape[1], shape[0], shape[2], gdal.GDT_Float32, driverOpt)
+        ds = driver.Create(outPath, shape[1], shape[0], shape[2], gdal.GDT_Int16, driverOpt)
         ds.SetProjection(proj)
         ds.SetGeoTransform(geotransform)
         for i in range(shape[2]):
-            ds.GetRasterBand(i+1).WriteArray(data[:, :, i])
+            ds.GetRasterBand(i+1).WriteArray(data[:, :, i].astype(int))
             ds.GetRasterBand(i+1).SetNoDataValue(noDataValue)
     else:
         ds = driver.Create(outPath, shape[1], shape[0], 1, gdal.GDT_Float32)
         ds.SetProjection(proj)
         ds.SetGeoTransform(geotransform)
-        ds.GetRasterBand(1).WriteArray(data)
+        ds.GetRasterBand(1).WriteArray(data.astype(int))
         ds.GetRasterBand(1).SetNoDataValue(noDataValue)
 
     return ds
