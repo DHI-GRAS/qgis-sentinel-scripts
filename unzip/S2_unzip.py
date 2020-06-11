@@ -13,6 +13,6 @@ def unzip(src_file, dst_dir):
     with zipfile.ZipFile(src_file) as zf:
         zf.extractall(u'\\\\?\\' + dst_dir)
 
-progress.setConsoleInfo('Starting unzip')
+feedback.pushConsoleInfo('Starting unzip')
 unzip(inFile, processingDir)
-progress.setConsoleInfo('Unzip finished...')
+feedback.pushConsoleInfo('Unzip finished...')
