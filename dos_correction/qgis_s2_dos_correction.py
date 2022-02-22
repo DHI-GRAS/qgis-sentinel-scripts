@@ -1,4 +1,3 @@
-import sys
 import os
 import numpy as np
 import glob
@@ -6,7 +5,10 @@ from xml.etree import ElementTree as ET
 from math import cos, radians, pi
 from osgeo import gdal
 
+from processing.tools import dataobjects
 from qgis.processing import alg
+
+
 @alg(
     name="sentinel2atmosphericcorrection",
     label=alg.tr("Sentinel-2 atmospheric correction"),
@@ -39,6 +41,10 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
     """ sentinel2atmosphericcorrection """
     driverOptionsGTiff = ['COMPRESS=DEFLATE', 'PREDICTOR=1', 'BIGTIFF=IF_SAFER']
 
+    input_file = instance.parameterAsString(parameters, 'input_file', context)
+    meta_file = instance.parameterAsString(parameters, 'meta_file', context)
+    method = instance.parameterAsInt(parameters, 'method', context)
+    output_file = instance.parameterAsString(parameters, 'output_file', context)
 
     def atmProcessingMain(options):
 
@@ -67,7 +73,6 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
         inImg = None
         output_image = None
 
-
     # Method taken from the bottom of http://s2tbx.telespazio-vega.de/sen2three/html/r2rusage.html
     # Assumes a L1C product which contains TOA reflectance: https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/product-types
     def toaRadianceS2(inImg, metadataFile, output_file):
@@ -84,7 +89,6 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
             radiometricData[:, :, i] = (rToa * e0[i] * cos(radians(z))) / pi
         res = saveImg(radiometricData, inImg.GetGeoTransform(), inImg.GetProjection(), output_file)
         return res
-
 
     # Assumes a L1C product which contains TOA reflectance: https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/product-types
     def toaReflectanceS2(inImg, metadataFile, output_file, doDOS=False):
@@ -104,7 +108,6 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
         res = saveImg(rToa, inImg.GetGeoTransform(), inImg.GetProjection(), output_file)
         return res
 
-
     def darkObjectSubstraction(inImg):
         dosDN = []
         tempData = inImg.GetRasterBand(1).ReadAsArray()
@@ -118,7 +121,6 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
                     dosDN.append(i-1)
                     break
         return dosDN
-
 
     def readMetadataS2L1C(metadataFile):
         # Get parameters from main metadata file
@@ -144,13 +146,13 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
         # save to dictionary
         metaDict = {}
         metaDict.update({'product_name': ProductName,
-                        'product_start': dateTimeStr,
-                        'processing_level': procesLevel,
-                        'spacecraft': spaceCraft,
-                        'orbit_direction': orbitDirection,
-                        'quantification_value': quantificationVal,
-                        'reflection_conversion': reflectConversion,
-                        'irradiance_values': e0})
+                         'product_start': dateTimeStr,
+                         'processing_level': procesLevel,
+                         'spacecraft': spaceCraft,
+                         'orbit_direction': orbitDirection,
+                         'quantification_value': quantificationVal,
+                         'reflection_conversion': reflectConversion,
+                         'irradiance_values': e0})
         # granule
         XML_mask = 'MTD_TL.xml'
         globlist = os.path.join(os.path.dirname(metadataFile), "GRANULE", "L1C_*", XML_mask)
@@ -194,23 +196,23 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
 
         # save to dictionary
         metaDict.update({'sun_zenit': sunZen,
-                        'sun_azimuth': sunAz,
-                        'sensor_zenit': sensorZen,
-                        'sensor_azimuth': sensorAz,
-                        'projection': EPSG,
-                        'cloudCoverPercent': cldCoverPercent,
-                        'rows_10': rows_10,
-                        'cols_10': cols_10,
-                        'rows_20': rows_20,
-                        'cols_20': cols_20,
-                        'rows_60': rows_60,
-                        'cols_60': cols_60,
-                        'ULX_10': ULX_10,
-                        'ULY_10': ULY_10,
-                        'ULX_20': ULX_20,
-                        'ULY_20': ULY_20,
-                        'ULX_60': ULX_60,
-                        'ULY_60': ULY_60})
+                         'sun_azimuth': sunAz,
+                         'sensor_zenit': sensorZen,
+                         'sensor_azimuth': sensorAz,
+                         'projection': EPSG,
+                         'cloudCoverPercent': cldCoverPercent,
+                         'rows_10': rows_10,
+                         'cols_10': cols_10,
+                         'rows_20': rows_20,
+                         'cols_20': cols_20,
+                         'rows_60': rows_60,
+                         'cols_60': cols_60,
+                         'ULX_10': ULX_10,
+                         'ULY_10': ULY_10,
+                         'ULX_20': ULX_20,
+                         'ULY_20': ULY_20,
+                         'ULX_60': ULX_60,
+                         'ULY_60': ULY_60})
         return metaDict
 
 
@@ -253,3 +255,4 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
     options["atmCorrMethod"] = methodList[method]
 
     reflectanceImg = atmProcessingMain(options)
+    dataobjects.load(reflectanceImg)
