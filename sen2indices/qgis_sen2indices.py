@@ -118,5 +118,5 @@ def sentinel2indices(instance, parameters, context, feedback, inputs):
 
 
     print('Starting index calculation...')
-    sen2indices.sen2indices(input, outputDirectory)
+    sen2indices(input, outputDirectory)
     print('Finished writing to disk...')
