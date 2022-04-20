@@ -32,7 +32,7 @@ def sentinel2indices(instance, parameters, context, feedback, inputs):
     # function for calculating a selction of Sentinel 2 Spectral indices
     # Kenneth Grogan 3/11/2016
 
-    input = instance.parameterAsString(parameters, "input", context)
+    input = instance.parameterAsRasterLayer(parameters, "input", context)
     outputDirectory = instance.parameterAsString(parameters, "outputDirectory", context)
     output = instance.parameterAsString(parameters, "output", context)
 
@@ -118,5 +118,5 @@ def sentinel2indices(instance, parameters, context, feedback, inputs):
 
 
     print('Starting index calculation...')
-    sen2indices(input, outputDirectory)
+    sen2indices(input.source(), outputDirectory)
     print('Finished writing to disk...')

@@ -16,10 +16,9 @@ from qgis.processing import alg
     group_label=alg.tr("Sentinel Tools"),
 )
 @alg.input(
-    type=alg.FILE,
+    type=alg.RASTER_LAYER,
     name="input_file",
     label="Input file (band stacked)",
-    behavior=0,
     optional=False,
 )
 @alg.input(
@@ -41,7 +40,7 @@ def sentinel2atmosphericcorrection(instance, parameters, context, feedback, inpu
     """ sentinel2atmosphericcorrection """
     driverOptionsGTiff = ['COMPRESS=DEFLATE', 'PREDICTOR=1', 'BIGTIFF=IF_SAFER']
 
-    input_file = instance.parameterAsString(parameters, 'input_file', context)
+    input_file = instance.parameterAsRasterLayer(parameters, 'input_file', context).source()
     meta_file = instance.parameterAsString(parameters, 'meta_file', context)
     method = instance.parameterAsInt(parameters, 'method', context)
     output_file = instance.parameterAsString(parameters, 'output_file', context)
