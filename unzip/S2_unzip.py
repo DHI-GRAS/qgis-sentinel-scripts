@@ -15,14 +15,14 @@ from qgis.processing import alg
     label="zipped file",
     behavior=0,
     optional=False,
-    fileFilter="zip",
+    fileFilter="*.zip",
 )
-@alg.input(type=alg.FILE_DEST, name="processingDir", label="Directory to unzip data to")
+@alg.input(type=alg.FOLDER_DEST, name="processingDir", label="Directory to unzip data to")
 def unzipsentinel2data(instance, parameters, context, feedback, inputs):
     """ unzipsentinel2data """
     inFile = instance.parameterAsString(parameters, 'inFile', context)
     processingDir = instance.parameterAsString(parameters, 'processingDir', context)
-    
+
     def unzip(src_file, dst_dir):
         with zipfile.ZipFile(src_file) as zf:
             zf.extractall(u'\\\\?\\' + dst_dir)
